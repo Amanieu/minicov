@@ -1,0 +1,2 @@
+[workspace]
+members = ["cargo-minicov", "minicov", "minicov-test"]

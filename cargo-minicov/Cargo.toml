@@ -1,0 +1,19 @@
+[package]
+name = "cargo-minicov"
+version = "0.1.0"
+authors = ["Amanieu d'Antras <amanieu@gmail.com>"]
+description = "Code coverage support for no_std and embedded programs"
+license = "Apache-2.0/MIT"
+repository = "https://github.com/Amanieu/minicov"
+readme = "../README.md"
+keywords = ["coverage", "no_std", "gcov"]
+categories = ["development-tools", "no-std", "embedded"]
+edition = "2018"
+
+[dependencies]
+postcard = { version = "0.5.0", default-features = false }
+serde = "1.0.106"
+structopt = "0.3.13"
+
+[build-dependencies]
+cc = "1.0.50"
