@@ -74,6 +74,18 @@
 //! cargo minicov output.minicov
 //! ```
 //!
+//! You can pass multiple input files to `cargo minicov`, or even concatenate
+//! multiple input files into a single file:
+//!
+//! ```sh
+//! cargo minicov a.minicov b.minicov
+//!
+//! # Or
+//!
+//! cat a.minicov b.minicov > combined.minicov
+//! cargo minicov combined.minicov
+//! ```
+//!
 //! 7. Use your favorite GCOV-compatible coverage tool (e.g. [grcov]) to
 //!    process the .gcda files.
 //!

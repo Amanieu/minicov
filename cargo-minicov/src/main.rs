@@ -82,71 +82,87 @@ fn main() -> Result<(), ()> {
     let Opt::Minicov { inputs } = Opt::from_args();
 
     for path in inputs {
-        let bytes = fs::read(&path).map_err(|e| {
-            eprintln!(
-                "Could not open input file {}: {}",
-                path.to_string_lossy(),
-                e
-            )
-        })?;
+        let path_str = path.to_string_lossy();
+        println!("Processing input file {}...", path_str);
 
-        if !bytes.starts_with(&MAGIC) {
-            eprintln!(
-                "Input file {} does not contain minicov data",
-                path.to_string_lossy()
-            );
-            return Err(());
-        }
-        let bytes = &bytes[MAGIC.len()..];
-        if !bytes.starts_with(&VERSION) {
-            eprintln!(
-                "Input file {} is from an incompatible version of minicov",
-                path.to_string_lossy()
-            );
-            return Err(());
-        }
-        let mut bytes = &bytes[VERSION.len()..];
+        let bytes = fs::read(&path)
+            .map_err(|e| eprintln!("Could not open input file {}: {}", path_str, e))?;
 
-        loop {
-            let (event, rest) = postcard::take_from_bytes(bytes).map_err(|e| {
+        // Outer loop to handle concatenated files
+        let mut index = 0;
+        let mut bytes = &bytes[..];
+        'outer: loop {
+            if index != 0 {
+                println!("Processing appended data #{}...", index);
+            }
+
+            if !bytes.starts_with(&MAGIC) {
+                eprintln!("Input file {} does not contain minicov data", path_str);
+                return Err(());
+            }
+            bytes = &bytes[MAGIC.len()..];
+            if !bytes.starts_with(&VERSION) {
                 eprintln!(
-                    "Error deserializing coverage data {}: {}",
-                    path.to_string_lossy(),
-                    e
-                )
-            })?;
-            bytes = rest;
+                    "Input file {} is from an incompatible version of minicov",
+                    path_str
+                );
+                return Err(());
+            }
+            bytes = &bytes[VERSION.len()..];
 
-            match event {
-                CovEvent::StartFile {
-                    orig_filename,
-                    version,
-                    checksum,
-                } => unsafe { llvm_gcda_start_file(orig_filename.as_ptr(), &version, checksum) },
-                CovEvent::EmitFunction {
-                    ident,
-                    function_name,
-                    func_checksum,
-                    use_extra_checksum,
-                    cfg_checksum,
-                } => unsafe {
-                    llvm_gcda_emit_function(
+            loop {
+                let (event, rest) = postcard::take_from_bytes(bytes).map_err(|e| {
+                    eprintln!(
+                        "Error deserializing coverage data {}: {}",
+                        path.to_string_lossy(),
+                        e
+                    )
+                })?;
+                bytes = rest;
+
+                match event {
+                    CovEvent::StartFile {
+                        orig_filename,
+                        version,
+                        checksum,
+                    } => unsafe {
+                        llvm_gcda_start_file(orig_filename.as_ptr(), &version, checksum)
+                    },
+                    CovEvent::EmitFunction {
                         ident,
-                        function_name.as_ptr(),
+                        function_name,
                         func_checksum,
                         use_extra_checksum,
                         cfg_checksum,
-                    )
-                },
-                CovEvent::EmitArcs { mut counters } => unsafe {
-                    llvm_gcda_emit_arcs(counters.len() as u32, counters.as_mut_ptr())
-                },
-                CovEvent::SummaryInfo => unsafe { llvm_gcda_summary_info() },
-                CovEvent::EndFile => unsafe { llvm_gcda_end_file() },
-                CovEvent::End => break,
+                    } => unsafe {
+                        llvm_gcda_emit_function(
+                            ident,
+                            function_name.as_ptr(),
+                            func_checksum,
+                            use_extra_checksum,
+                            cfg_checksum,
+                        )
+                    },
+                    CovEvent::EmitArcs { mut counters } => unsafe {
+                        llvm_gcda_emit_arcs(counters.len() as u32, counters.as_mut_ptr())
+                    },
+                    CovEvent::SummaryInfo => unsafe { llvm_gcda_summary_info() },
+                    CovEvent::EndFile => unsafe { llvm_gcda_end_file() },
+                    CovEvent::End => {
+                        // Check for another set of input data appended to the
+                        // end of the this one.
+                        if !bytes.is_empty() {
+                            index += 1;
+                            continue 'outer;
+                        } else {
+                            break 'outer;
+                        }
+                    }
+                }
             }
         }
     }
 
+    println!("Done");
     Ok(())
 }
