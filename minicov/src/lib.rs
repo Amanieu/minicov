@@ -123,7 +123,7 @@ static REGISTERED_FNS: Spinlock<Vec<extern "C" fn()>> = Spinlock::new(Vec::new()
 const MAGIC: [u8; 8] = *b"minicov\0";
 
 /// File format version.
-const VERSION: [u8; 4] = *b"v01\0";
+const VERSION: [u8; 4] = *b"v02\0";
 
 /// Recording of a call to a `llvm_gcda_*` function.
 ///
@@ -132,14 +132,12 @@ const VERSION: [u8; 4] = *b"v01\0";
 enum CovEvent {
     StartFile {
         orig_filename: &'static [u8],
-        version: [c_char; 4],
+        version: u32,
         checksum: u32,
     },
     EmitFunction {
         ident: u32,
-        function_name: &'static [u8],
         func_checksum: u32,
-        use_extra_checksum: u8,
         cfg_checksum: u32,
     },
     EmitArcs {
@@ -182,7 +180,7 @@ unsafe extern "C" fn llvm_gcov_init(_writeout: extern "C" fn(), flush: extern "C
 #[no_mangle]
 unsafe extern "C" fn llvm_gcda_start_file(
     orig_filename: *const c_char,
-    version: *const [c_char; 4],
+    version: u32,
     checksum: u32,
 ) {
     if let Some(callback) = CALLBACK {
@@ -191,7 +189,7 @@ unsafe extern "C" fn llvm_gcda_start_file(
 
         (*callback)(CovEvent::StartFile {
             orig_filename,
-            version: *version,
+            version,
             checksum,
         });
     }
@@ -200,20 +198,13 @@ unsafe extern "C" fn llvm_gcda_start_file(
 #[no_mangle]
 unsafe extern "C" fn llvm_gcda_emit_function(
     ident: u32,
-    function_name: *const c_char,
     func_checksum: u32,
-    use_extra_checksum: u8,
     cfg_checksum: u32,
 ) {
     if let Some(callback) = CALLBACK {
-        // Exclude the null byte so that deserialization matches that of CString.
-        let function_name = CStr::from_ptr(function_name).to_bytes();
-
         (*callback)(CovEvent::EmitFunction {
             ident,
-            function_name,
             func_checksum,
-            use_extra_checksum,
             cfg_checksum,
         });
     }

@@ -20,14 +20,12 @@ extern crate profiler_builtins;
 extern "C" {
     fn llvm_gcda_start_file(
         orig_filename: *const c_char,
-        version: *const [c_char; 4],
+        version: u32,
         checksum: u32,
     );
     fn llvm_gcda_emit_function(
         ident: u32,
-        function_name: *const c_char,
         func_checksum: u32,
-        use_extra_checksum: u8,
         cfg_checksum: u32,
     );
     fn llvm_gcda_emit_arcs(num_counters: u32, counters: *mut u64);
@@ -39,7 +37,7 @@ extern "C" {
 const MAGIC: [u8; 8] = *b"minicov\0";
 
 /// File format version.
-const VERSION: [u8; 4] = *b"v01\0";
+const VERSION: [u8; 4] = *b"v02\0";
 
 /// Recording of a call to a `llvm_gcda_*` function.
 ///
@@ -48,14 +46,12 @@ const VERSION: [u8; 4] = *b"v01\0";
 enum CovEvent {
     StartFile {
         orig_filename: CString,
-        version: [c_char; 4],
+        version: u32,
         checksum: u32,
     },
     EmitFunction {
         ident: u32,
-        function_name: CString,
         func_checksum: u32,
-        use_extra_checksum: u8,
         cfg_checksum: u32,
     },
     EmitArcs {
@@ -126,20 +122,16 @@ fn main() -> Result<(), ()> {
                         version,
                         checksum,
                     } => unsafe {
-                        llvm_gcda_start_file(orig_filename.as_ptr(), &version, checksum)
+                        llvm_gcda_start_file(orig_filename.as_ptr(), version, checksum)
                     },
                     CovEvent::EmitFunction {
                         ident,
-                        function_name,
                         func_checksum,
-                        use_extra_checksum,
                         cfg_checksum,
                     } => unsafe {
                         llvm_gcda_emit_function(
                             ident,
-                            function_name.as_ptr(),
                             func_checksum,
-                            use_extra_checksum,
                             cfg_checksum,
                         )
                     },
