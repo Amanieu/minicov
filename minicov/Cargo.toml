@@ -11,7 +11,7 @@ categories = ["development-tools", "no-std", "embedded"]
 edition = "2018"
 
 [dependencies]
-cstr_core = "0.2.0"
-postcard = { version = "0.5.0", default-features = false, features = ["alloc"] }
-serde = { version = "1.0.106", default-features = false, features = ["alloc"] }
-spinning_top = { version = "0.1.0", features = ["nightly"] }
+cstr_core = "0.2.2"
+postcard = { version = "0.5.1", default-features = false, features = ["alloc"] }
+serde = { version = "1.0.117", default-features = false, features = ["alloc"] }
+spinning_top = { version = "0.2.2", features = ["nightly"] }

@@ -11,9 +11,9 @@ categories = ["development-tools", "no-std", "embedded"]
 edition = "2018"
 
 [dependencies]
-postcard = { version = "0.5.0", default-features = false }
-serde = "1.0.106"
-structopt = "0.3.13"
+postcard = { version = "0.5.1", default-features = false }
+serde = "1.0.117"
+structopt = "0.3.20"
 
 [build-dependencies]
-cc = "1.0.50"
+cc = "1.0.62"
