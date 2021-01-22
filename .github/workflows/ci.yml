@@ -32,18 +32,12 @@ jobs:
           command: install
           args: grcov
       - uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: --path cargo-minicov
-      - uses: actions-rs/cargo@v1
         env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: -Zprofile -Zno-profiler-runtime -Copt-level=0 -Clink-dead-code -Coverflow-checks=off
+          RUSTFLAGS: -Zinstrument-coverage -Zno-profiler-runtime
         with:
           command: run
           args: --target x86_64-unknown-linux-gnu -p minicov-test
-      - run: cargo minicov output.minicov
-      - run: grcov --llvm -t html .
+      - run: grcov -t html output.profraw -b target/x86_64-unknown-linux-gnu/debug/minicov-test
 
   fmt:
     name: Rustfmt

@@ -1,17 +1,17 @@
 [package]
 name = "minicov"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Amanieu d'Antras <amanieu@gmail.com>"]
 description = "Code coverage support for no_std and embedded programs"
 license = "Apache-2.0/MIT"
 repository = "https://github.com/Amanieu/minicov"
 readme = "../README.md"
-keywords = ["coverage", "no_std", "gcov"]
+keywords = ["coverage", "no_std", "llvm-cov"]
 categories = ["development-tools", "no-std", "embedded"]
 edition = "2018"
 
 [dependencies]
-cstr_core = "0.2.2"
-postcard = { version = "0.5.1", default-features = false, features = ["alloc"] }
-serde = { version = "1.0.117", default-features = false, features = ["alloc"] }
-spinning_top = { version = "0.2.2", features = ["nightly"] }
+
+[build-dependencies]
+cc = "1.0.66"
+walkdir = "2.3.1"
