@@ -1,5 +1,5 @@
 //! This crate provides code coverage support for `no_std` and embedded programs.
-//! 
+//!
 //! This is done through a modified version of the LLVM profiling runtime (normally
 //!     part of compiler-rt) from which all dependencies on libc have been removed.
 //!     
@@ -9,7 +9,7 @@
 //! - Clang code coverage with `-fprofile-instr-generate -fcoverage-mapping`.
 //! - Clang profile-guided optimization with `-fprofile-instr-generate`.
 //! - Clang LLVM IR profile-guided optimization with `-fprofile-generate`.
-//! 
+//!
 //! Note that to profile both C and Rust code at the same time you must use Clang
 //! with the same LLVM version as the LLVM used by rustc.
 //!
