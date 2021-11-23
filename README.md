@@ -62,7 +62,7 @@ fn main() {
 
 If you're program doesn't have the default alloc feature enabled you can use 
 `minicov::get_coverage_data_size`, to get the size required for the report and 
-`minicov::capture_coverage_to_buffer` to serialize the report:
+`minicov::capture_coverage_to_buffer` to serialize the coverage data:
 
 ```ignore
 fn main() {
