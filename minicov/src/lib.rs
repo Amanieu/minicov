@@ -130,8 +130,9 @@ pub fn get_coverage_data_size() -> usize {
 }
 
 /// Captures the coverage data for the current program and writes it into the
-/// provided slice. The slice must be the correct size to hold the report so
-/// call `get_coverage_data_size` beforehand to ensure enough data is allocated.
+/// provided slice. The slice must be the correct size to hold the coverage data
+/// so call `get_coverage_data_size` beforehand to ensure enough data is
+/// allocated.
 ///
 /// The blob should be saved to a file with the `.profraw` extension, which can
 /// then be processed using the `llvm-profdata` and `llvm-cov` tools.
