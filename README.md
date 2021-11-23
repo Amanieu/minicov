@@ -60,6 +60,25 @@ fn main() {
 }
 ```
 
+If you're program doesn't have the default alloc feature enabled you can use 
+`minicov::get_coverage_data_size`, to get the size required for the report and 
+`minicov::capture_coverage_to_buffer` to serialize the report:
+
+```ignore
+fn main() {
+    // ...
+
+    // with REPORT_SIZE as a const usize
+    let mut buffer: [u8; REPORT_SIZE] = [0; REPORT_SIZE];
+    
+    let actual_size = minicov::get_coverage_data_size();
+    assert!(actual_size <= REPORT_SIZE, "Not enough space reserved for report");
+    minicov::capture_coverage_to_buffer(&mut buffer[0..actual_size]);
+    
+    // Transfer report somewhere else
+}
+```
+
 If your program is running on a different system than your build system then
 you will need to transfer this file back to your build system.
 

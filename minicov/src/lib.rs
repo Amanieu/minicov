@@ -125,13 +125,13 @@ pub fn capture_coverage() -> Vec<u8> {
 }
 
 /// Returns the size required to store the serialized coverage data
-pub fn get_report_size() -> usize {
+pub fn get_coverage_data_size() -> usize {
     unsafe { __llvm_profile_get_size_for_buffer() as usize }
 }
 
 /// Captures the coverage data for the current program and writes it into the
 /// provided slice. The slice must be the correct size to hold the report so
-/// call `get_report_size` beforehand to ensure enough data is allocated.
+/// call `get_coverage_data_size` beforehand to ensure enough data is allocated.
 ///
 /// The blob should be saved to a file with the `.profraw` extension, which can
 /// then be processed using the `llvm-profdata` and `llvm-cov` tools.
@@ -143,7 +143,7 @@ pub fn capture_coverage_to_buffer(data: &mut [u8]) {
     check_version();
 
     let len = unsafe { __llvm_profile_get_size_for_buffer() as usize };
-    assert!(len <= data.len());
+    assert_eq!(len, data.len());
     unsafe {
         let ret = __llvm_profile_write_buffer(data.as_mut_ptr());
         assert_eq!(ret, 0);
