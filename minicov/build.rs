@@ -7,13 +7,12 @@ fn main() {
 
     let sources = [
         "c/InstrProfiling.c",
-        "c/InstrProfilingBiasVar.c",
         "c/InstrProfilingBuffer.c",
         "c/InstrProfilingInternal.c",
         "c/InstrProfilingMerge.c",
-        "c/InstrProfilingNameVar.c",
         "c/InstrProfilingPlatformLinux.c",
         "c/InstrProfilingWriter.c",
+        "c/InstrProfilingVersionVar.c",
     ];
 
     for source in &sources {

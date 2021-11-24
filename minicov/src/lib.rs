@@ -79,14 +79,14 @@ use core::fmt;
 
 extern "C" {
     fn __llvm_profile_reset_counters();
-    fn __llvm_profile_merge_from_buffer(profile: *const u8, size: u64);
+    fn __llvm_profile_merge_from_buffer(profile: *const u8, size: u64) -> i32;
     fn __llvm_profile_write_buffer(buffer: *mut u8) -> i32;
     fn __llvm_profile_get_size_for_buffer() -> u64;
     fn __llvm_profile_check_compatibility(profile: *const u8, size: u64) -> i32;
     fn __llvm_profile_get_version() -> u64;
 }
 
-const INSTR_PROF_RAW_VERSION: u64 = 5;
+const INSTR_PROF_RAW_VERSION: u64 = 7;
 const VARIANT_MASKS_ALL: u64 = 0xff00000000000000;
 
 /// Checks that the instrumented binary uses the same profiling data format as
@@ -170,8 +170,9 @@ pub fn merge_coverage(data: &[u8]) -> Result<(), IncompatibleCoverageData> {
     check_version();
 
     unsafe {
-        if __llvm_profile_check_compatibility(data.as_ptr(), data.len() as u64) == 0 {
-            __llvm_profile_merge_from_buffer(data.as_ptr(), data.len() as u64);
+        if __llvm_profile_check_compatibility(data.as_ptr(), data.len() as u64) == 0
+            && __llvm_profile_merge_from_buffer(data.as_ptr(), data.len() as u64) == 0
+        {
             Ok(())
         } else {
             Err(IncompatibleCoverageData)

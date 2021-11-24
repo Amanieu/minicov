@@ -23,6 +23,7 @@
 #define COMPILER_RT_FTRUNCATE(f,l) _chsize(_fileno(f),l)
 #define COMPILER_RT_ALWAYS_INLINE __forceinline
 #define COMPILER_RT_CLEANUP(x)
+#define COMPILER_RT_USED
 #elif __GNUC__
 #ifdef _WIN32
 #define COMPILER_RT_FTRUNCATE(f, l) _chsize(fileno(f), l)
@@ -37,6 +38,7 @@
 #define COMPILER_RT_ALLOCA __builtin_alloca
 #define COMPILER_RT_ALWAYS_INLINE inline __attribute((always_inline))
 #define COMPILER_RT_CLEANUP(x) __attribute__((cleanup(x)))
+#define COMPILER_RT_USED __attribute__((used))
 #endif
 
 #if defined(__APPLE__)
@@ -86,7 +88,6 @@
   (DomType *)__sync_fetch_and_add((long *)&PtrVar, sizeof(DomType) * PtrIncr)
 #endif
 #else /* COMPILER_RT_HAS_ATOMICS != 1 */
-#include "InstrProfilingUtil.h"
 #define COMPILER_RT_BOOL_CMPXCHG(Ptr, OldV, NewV)                              \
   lprofBoolCmpXchg((void **)Ptr, OldV, NewV)
 #define COMPILER_RT_PTR_FETCH_ADD(DomType, PtrVar, PtrIncr)                    \
@@ -146,7 +147,6 @@ static inline size_t getpagesize() {
 
 #else /* defined(__FreeBSD__) */
 
-//#include <inttypes.h>
 #include <stdint.h>
 
 #endif /* defined(__FreeBSD__) && defined(__i386__) */
