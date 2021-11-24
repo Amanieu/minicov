@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## v0.2.1 - 2021-11-24
+
+- Added no-alloc support (#3)
+- Updated bundled LLVM runtime library for LLVM 13.
+
 ## v0.2.0 - 2021-01-22
 
 - Major rewrite to use the new LLVM source-based coverage support.
@@ -23,7 +28,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/rust-lang/hashbrown/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/rust-lang/hashbrown/compare/v0.2.1...HEAD
+[v0.2.1]: https://github.com/rust-lang/hashbrown/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/rust-lang/hashbrown/compare/v0.1.2...v0.2.0
 [v0.1.2]: https://github.com/rust-lang/hashbrown/compare/v0.1.1...v0.1.2
 [v0.1.1]: https://github.com/rust-lang/hashbrown/compare/v0.1.0...v0.1.1
