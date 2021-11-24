@@ -70,8 +70,10 @@
 #![warn(missing_docs)]
 #![warn(rust_2018_idioms)]
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
+#[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 use core::fmt;
 
@@ -106,6 +108,7 @@ fn check_version() {
 /// You should call `reset_coverage` afterwards if you intend to continue
 /// running the program so that future coverage can be merged with the returned
 /// captured coverage.
+#[cfg(feature = "alloc")]
 pub fn capture_coverage() -> Vec<u8> {
     check_version();
 
@@ -119,6 +122,33 @@ pub fn capture_coverage() -> Vec<u8> {
     }
 
     data
+}
+
+/// Returns the size required to store the serialized coverage data
+pub fn get_coverage_data_size() -> usize {
+    unsafe { __llvm_profile_get_size_for_buffer() as usize }
+}
+
+/// Captures the coverage data for the current program and writes it into the
+/// provided slice. The slice must be the correct size to hold the coverage data
+/// so call `get_coverage_data_size` beforehand to ensure enough data is
+/// allocated.
+///
+/// The blob should be saved to a file with the `.profraw` extension, which can
+/// then be processed using the `llvm-profdata` and `llvm-cov` tools.
+///
+/// You should call `reset_coverage` afterwards if you intend to continue
+/// running the program so that future coverage can be merged with the returned
+/// captured coverage.
+pub fn capture_coverage_to_buffer(data: &mut [u8]) {
+    check_version();
+
+    let len = unsafe { __llvm_profile_get_size_for_buffer() as usize };
+    assert_eq!(len, data.len());
+    unsafe {
+        let ret = __llvm_profile_write_buffer(data.as_mut_ptr());
+        assert_eq!(ret, 0);
+    }
 }
 
 /// Error type returned when trying to merge incompatible coverage data.

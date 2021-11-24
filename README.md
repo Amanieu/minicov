@@ -60,6 +60,25 @@ fn main() {
 }
 ```
 
+If you're program doesn't have the default alloc feature enabled you can use 
+`minicov::get_coverage_data_size`, to get the size required for the coverage data 
+and `minicov::capture_coverage_to_buffer` to serialize the coverage data:
+
+```ignore
+fn main() {
+    // ...
+
+    // with COVERAGE_DATA_SIZE as a const usize
+    let mut buffer: [u8; COVERAGE_DATA_SIZE] = [0; COVERAGE_DATA_SIZE];
+    
+    let actual_size = minicov::get_coverage_data_size();
+    assert!(actual_size <= COVERAGE_DATA_SIZE, "Not enough space reserved for coverage daa");
+    minicov::capture_coverage_to_buffer(&mut buffer[0..actual_size]);
+    
+    // Transfer coverage data somewhere else
+}
+```
+
 If your program is running on a different system than your build system then
 you will need to transfer this file back to your build system.
 

@@ -10,6 +10,10 @@ keywords = ["coverage", "no_std", "llvm-cov"]
 categories = ["development-tools", "no-std", "embedded"]
 edition = "2018"
 
+[features]
+default = ["alloc"]
+alloc = []
+
 [dependencies]
 
 [build-dependencies]
