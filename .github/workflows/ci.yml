@@ -27,6 +27,7 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
+      - run: rustup component add llvm-tools-preview
       - uses: actions-rs/cargo@v1
         with:
           command: install
