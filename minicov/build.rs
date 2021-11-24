@@ -3,6 +3,10 @@ use walkdir::WalkDir;
 
 fn main() {
     let mut cfg = Build::new();
+    cfg.compiler("clang");
+    cfg.flag("-nostdlibinc");
+    cfg.flag("-fno-stack-protector");
+    cfg.flag("-fno-profile-instr-generate");
     cfg.define("COMPILER_RT_HAS_ATOMICS", "1");
 
     let sources = [

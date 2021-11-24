@@ -195,11 +195,3 @@ pub fn reset_coverage() {
         __llvm_profile_reset_counters();
     }
 }
-
-// On some targets LLVM will emit calls to these functions. We don't actually
-// use them since we locate the profiling counters directly through linker
-// sections.
-#[no_mangle]
-extern "C" fn __llvm_profile_register_names_function(_names_start: *mut u8, _names_size: u64) {}
-#[no_mangle]
-extern "C" fn __llvm_profile_register_function(_data: *mut u8) {}
