@@ -60,7 +60,7 @@ fn main() {
 }
 ```
 
-If you're program doesn't have the default alloc feature enabled you can use 
+If your program doesn't have the default `alloc` feature enabled you can use 
 `minicov::get_coverage_data_size`, to get the size required for the coverage data 
 and `minicov::capture_coverage_to_buffer` to serialize the coverage data:
 
@@ -79,7 +79,7 @@ fn main() {
 }
 ```
 
-If your program is running on a different system than your build system then
+If your program is running on a different system than your build system, then
 you will need to transfer this file back to your build system.
 
 4. Use a tool such as [grcov] or llvm-cov to generate a human-readable coverage
