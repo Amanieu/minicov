@@ -48,8 +48,8 @@ cargo build --target x86_64-unknown-linux-gnu
 minicov = "0.2"
 ```
 
-3. Before your program exits, call `minicov::capture_coverage` which returns
-   a `Vec<u8>` and dump its contents to a file with the `.profraw` extension:
+3. Before your program exits, call `minicov::capture_coverage` (which returns
+   a `Vec<u8>`) and dump its contents to a file with the `.profraw` extension:
 
 ```ignore
 fn main() {
