@@ -48,8 +48,8 @@ cargo build --target x86_64-unknown-linux-gnu
 minicov = "0.2"
 ```
 
-3. Before your program exits, call `minicov::capture_coverage` which returns
-   a `Vec<u8>` and dump its contents to a file with the `.profraw` extension:
+3. Before your program exits, call `minicov::capture_coverage` (which returns
+   a `Vec<u8>`) and dump its contents to a file with the `.profraw` extension:
 
 ```ignore
 fn main() {
@@ -60,7 +60,7 @@ fn main() {
 }
 ```
 
-If you're program doesn't have the default alloc feature enabled you can use 
+If your program doesn't have the default `alloc` feature enabled you can use 
 `minicov::get_coverage_data_size`, to get the size required for the coverage data 
 and `minicov::capture_coverage_to_buffer` to serialize the coverage data:
 
@@ -79,7 +79,7 @@ fn main() {
 }
 ```
 
-If your program is running on a different system than your build system then
+If your program is running on a different system than your build system, then
 you will need to transfer this file back to your build system.
 
 4. Use a tool such as [grcov] or llvm-cov to generate a human-readable coverage
