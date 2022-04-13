@@ -36,10 +36,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/rust-lang/hashbrown/compare/v0.2.3...HEAD
-[v0.2.1]: https://github.com/rust-lang/hashbrown/compare/v0.2.2...v0.2.3
-[v0.2.1]: https://github.com/rust-lang/hashbrown/compare/v0.2.1...v0.2.2
-[v0.2.1]: https://github.com/rust-lang/hashbrown/compare/v0.2.0...v0.2.1
-[v0.2.0]: https://github.com/rust-lang/hashbrown/compare/v0.1.2...v0.2.0
-[v0.1.2]: https://github.com/rust-lang/hashbrown/compare/v0.1.1...v0.1.2
-[v0.1.1]: https://github.com/rust-lang/hashbrown/compare/v0.1.0...v0.1.1
+[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.2.3...HEAD
+[v0.2.1]: https://github.com/Amanieu/minicov/compare/v0.2.2...v0.2.3
+[v0.2.1]: https://github.com/Amanieu/minicov/compare/v0.2.1...v0.2.2
+[v0.2.1]: https://github.com/Amanieu/minicov/compare/v0.2.0...v0.2.1
+[v0.2.0]: https://github.com/Amanieu/minicov/compare/v0.1.2...v0.2.0
+[v0.1.2]: https://github.com/Amanieu/minicov/compare/v0.1.1...v0.1.2
+[v0.1.1]: https://github.com/Amanieu/minicov/compare/v0.1.0...v0.1.1
