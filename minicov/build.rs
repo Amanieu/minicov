@@ -7,6 +7,7 @@ fn main() {
     cfg.flag("-nostdlibinc");
     cfg.flag("-fno-stack-protector");
     cfg.flag("-fno-profile-instr-generate");
+    cfg.flag("-fno-coverage-mapping");
     cfg.define("COMPILER_RT_HAS_ATOMICS", "1");
 
     let sources = [

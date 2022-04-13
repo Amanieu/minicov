@@ -118,7 +118,7 @@ static inline size_t getpagesize() {
 #else /* defined(_WIN32) */
 #include <stddef.h>
 static inline size_t getpagesize() {
-  // Not used since we don't support continuous mode.
+  // MINICOV: Not used since we don't support continuous mode.
   return 1;
 }
 #endif /* defined(_WIN32) */
@@ -140,16 +140,7 @@ static inline size_t getpagesize() {
 #define O_BINARY 0
 #endif
 
-#if defined(__FreeBSD__)
-
-#include <inttypes.h>
-#include <sys/types.h>
-
-#else /* defined(__FreeBSD__) */
-
 #include <stdint.h>
-
-#endif /* defined(__FreeBSD__) && defined(__i386__) */
 
 #define memset __builtin_memset
 #define memcpy __builtin_memcpy

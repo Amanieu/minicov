@@ -86,7 +86,7 @@ extern "C" {
     fn __llvm_profile_get_version() -> u64;
 }
 
-const INSTR_PROF_RAW_VERSION: u64 = 7;
+const INSTR_PROF_RAW_VERSION: u64 = 8;
 const VARIANT_MASKS_ALL: u64 = 0xff00000000000000;
 
 /// Checks that the instrumented binary uses the same profiling data format as
