@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## v0.2.4 - 2022-05-02
+
+- Fixed build for bare-metal targets again. (#7)
+
 ## v0.2.3 - 2022-04-14
 
 - Updated bundled LLVM runtime library for LLVM 14.
@@ -36,9 +40,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.2.3...HEAD
-[v0.2.1]: https://github.com/Amanieu/minicov/compare/v0.2.2...v0.2.3
-[v0.2.1]: https://github.com/Amanieu/minicov/compare/v0.2.1...v0.2.2
+[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.2.4...HEAD
+[v0.2.4]: https://github.com/Amanieu/minicov/compare/v0.2.3...v0.2.4
+[v0.2.3]: https://github.com/Amanieu/minicov/compare/v0.2.2...v0.2.3
+[v0.2.2]: https://github.com/Amanieu/minicov/compare/v0.2.1...v0.2.2
 [v0.2.1]: https://github.com/Amanieu/minicov/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/Amanieu/minicov/compare/v0.1.2...v0.2.0
 [v0.1.2]: https://github.com/Amanieu/minicov/compare/v0.1.1...v0.1.2
