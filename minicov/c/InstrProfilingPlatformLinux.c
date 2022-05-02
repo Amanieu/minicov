@@ -219,3 +219,17 @@ COMPILER_RT_VISIBILITY int __llvm_write_binary_ids(ProfDataWriter *Writer) {
   return 0;
 }
 #endif
+
+// On some targets LLVM will emit calls to these functions. We don't actually
+// use them since we locate the profiling counters directly through linker
+// sections.
+COMPILER_RT_VISIBILITY
+void __llvm_profile_register_function(void *Data_) {
+  (void)Data_;
+}
+COMPILER_RT_VISIBILITY
+void __llvm_profile_register_names_function(void *NamesStart,
+                                            uint64_t NamesSize) {
+  (void)NamesStart;
+  (void)NamesSize;
+}
