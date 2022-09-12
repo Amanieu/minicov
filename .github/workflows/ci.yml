@@ -34,11 +34,11 @@ jobs:
           args: grcov
       - uses: actions-rs/cargo@v1
         env:
-          RUSTFLAGS: -Zinstrument-coverage -Zno-profiler-runtime
+          RUSTFLAGS: -Cinstrument-coverage -Zno-profiler-runtime
         with:
           command: run
           args: --target x86_64-unknown-linux-gnu -p minicov-test
-      - run: grcov -t html output.profraw -b target/x86_64-unknown-linux-gnu/debug/minicov-test
+      - run: grcov -t html output.profraw -b target/x86_64-unknown-linux-gnu/debug/minicov-test -s .
 
   fmt:
     name: Rustfmt

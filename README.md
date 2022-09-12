@@ -10,7 +10,7 @@ This is done through a modified version of the LLVM profiling runtime (normally
 part of compiler-rt) from which all dependencies on libc have been removed.
 
 All types of instrumentation using the LLVM profiling runtime are supported:
-- Rust code coverage with `-Zinstrument-coverage`.
+- Rust code coverage with `-Cinstrument-coverage`.
 - Rust profile-guided optimization with `-Cprofile-generate`.
 - Clang code coverage with `-fprofile-instr-generate -fcoverage-mapping`.
 - Clang profile-guided optimization with `-fprofile-instr-generate`.
@@ -26,7 +26,7 @@ Note: This crate requires a recent nightly compiler.
 1. Ensure that the following environment variables are set up:
 
 ```sh
-export RUSTFLAGS="-Zinstrument-coverage -Zno-profiler-runtime"
+export RUSTFLAGS="-Cinstrument-coverage -Zno-profiler-runtime"
 ```
 
 Note that these flags also apply to build-dependencies and proc
@@ -86,7 +86,7 @@ you will need to transfer this file back to your build system.
 report:
 
 ```sh
-grcov output.profraw -b ./target/debug/my_program -t html -o cov_report
+grcov output.profraw -b ./target/debug/my_program -s . -t html -o cov_report
 ```
 
 [grcov]: https://github.com/mozilla/grcov
