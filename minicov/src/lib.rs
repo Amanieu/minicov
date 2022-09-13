@@ -13,7 +13,7 @@
 //! Note that to profile both C and Rust code at the same time you must use Clang
 //! with the same LLVM version as the LLVM used by rustc. You can pass these flags
 //! to C code compiled with the `cc` crates using [environment variables].
-//! 
+//!
 //! [environment variables]: https://github.com/rust-lang/cc-rs#external-configuration-via-environment-variables
 //!
 //! ## Usage
