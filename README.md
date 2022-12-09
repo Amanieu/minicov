@@ -4,7 +4,8 @@ minicov
 [![Crates.io](https://img.shields.io/crates/v/minicov.svg)](https://crates.io/crates/minicov)
 [![Documentation](https://docs.rs/minicov/badge.svg)](https://docs.rs/minicov)
 
-This crate provides code coverage support for `no_std` and embedded programs.
+This crate provides code coverage and profile-guided optimization (PGO) support
+for `no_std` and embedded programs.
 
 This is done through a modified version of the LLVM profiling runtime (normally
 part of compiler-rt) from which all dependencies on libc have been removed.
@@ -51,39 +52,27 @@ cargo build --target x86_64-unknown-linux-gnu
 minicov = "0.2"
 ```
 
-3. Before your program exits, call `minicov::capture_coverage` (which returns
-   a `Vec<u8>`) and dump its contents to a file with the `.profraw` extension:
+3. Before your program exits, call `minicov::capture_coverage` with a sink (such
+as `Vec<u8>`) and then dump its contents to a file with the `.profraw` extension:
 
 ```ignore
 fn main() {
     // ...
 
-    let coverage = minicov::capture_coverage();
+    let mut coverage = vec![];
+    unsafe {
+        // Note that this function is not thread-safe! Use a lock if needed.
+        minicov::capture_coverage(&mut coverage).unwrap();
+    }
     std::fs::write("output.profraw", coverage).unwrap();
 }
 ```
 
-If your program doesn't have the default `alloc` feature enabled you can use 
-`minicov::get_coverage_data_size`, to get the size required for the coverage data 
-and `minicov::capture_coverage_to_buffer` to serialize the coverage data:
-
-```ignore
-fn main() {
-    // ...
-
-    // with COVERAGE_DATA_SIZE as a const usize
-    let mut buffer: [u8; COVERAGE_DATA_SIZE] = [0; COVERAGE_DATA_SIZE];
-    
-    let actual_size = minicov::get_coverage_data_size();
-    assert!(actual_size <= COVERAGE_DATA_SIZE, "Not enough space reserved for coverage daa");
-    minicov::capture_coverage_to_buffer(&mut buffer[0..actual_size]);
-    
-    // Transfer coverage data somewhere else
-}
-```
-
-If your program is running on a different system than your build system, then
+If your program is running on a different system than your build system then
 you will need to transfer this file back to your build system.
+
+Sinks must implement the `CoverageWriter` trait. If the default `alloc` feature
+is enabled then an implementation is provided for `Vec<u8>`.
 
 4. Use a tool such as [grcov] or llvm-cov to generate a human-readable coverage
 report:
@@ -93,6 +82,25 @@ grcov output.profraw -b ./target/debug/my_program -s . -t html -o cov_report
 ```
 
 [grcov]: https://github.com/mozilla/grcov
+
+## Profile-guided optimization
+
+The steps for profile-guided optimzation are similar. The only difference is the
+flags passed in `RUSTFLAGS`:
+
+```sh
+# First run to generate profiling information.
+export RUSTFLAGS="-Cprofile-generate -Zno-profiler-runtime"
+cargo run --target x86_64-unknown-linux-gnu --release
+
+# Post-process the profiling information.
+# The rust-profdata tool comes from cargo-binutils.
+rust-profdata merge -o output.profdata output.profraw
+
+# Optimized build using PGO. minicov is not needed in this step.
+export RUSTFLAGS="-Cprofile-use=output.profdata"
+cargo build --target x86_64-unknown-linux-gnu --release
+```
 
 ## [Change log](CHANGELOG.md)
 

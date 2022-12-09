@@ -1,8 +1,9 @@
-//! This crate provides code coverage support for `no_std` and embedded programs.
+//! This crate provides code coverage and profile-guided optimization (PGO) support
+//! for `no_std` and embedded programs.
 //!
 //! This is done through a modified version of the LLVM profiling runtime (normally
-//!     part of compiler-rt) from which all dependencies on libc have been removed.
-//!     
+//! part of compiler-rt) from which all dependencies on libc have been removed.
+//!
 //! All types of instrumentation using the LLVM profiling runtime are supported:
 //! - Rust code coverage with `-Cinstrument-coverage`.
 //! - Rust profile-guided optimization with `-Cprofile-generate`.
@@ -45,20 +46,27 @@
 //! minicov = "0.2"
 //! ```
 //!
-//! 3. Before your program exits, call `minicov::capture_coverage` which returns
-//!    a `Vec<u8>` and dump its contents to a file with the `.profraw` extension:
+//! 3. Before your program exits, call `minicov::capture_coverage` with a sink (such
+//! as `Vec<u8>`) and then dump its contents to a file with the `.profraw` extension:
 //!
 //! ```ignore
 //! fn main() {
 //!     // ...
 //!
-//!     let coverage = minicov::capture_coverage();
+//!     let mut coverage = vec![];
+//!     unsafe {
+//!         // Note that this function is not thread-safe! Use a lock if needed.
+//!         minicov::capture_coverage(&mut coverage).unwrap();
+//!     }
 //!     std::fs::write("output.profraw", coverage).unwrap();
 //! }
 //! ```
 //!
 //! If your program is running on a different system than your build system then
 //! you will need to transfer this file back to your build system.
+//!
+//! Sinks must implement the `CoverageWriter` trait. If the default `alloc` feature
+//! is enabled then an implementation is provided for `Vec<u8>`.
 //!
 //! 4. Use a tool such as [grcov] or llvm-cov to generate a human-readable coverage
 //! report:
@@ -68,6 +76,25 @@
 //! ```
 //!
 //! [grcov]: https://github.com/mozilla/grcov
+//!
+//! ## Profile-guided optimization
+//!
+//! The steps for profile-guided optimzation are similar. The only difference is the
+//! flags passed in `RUSTFLAGS`:
+//!
+//! ```sh
+//! # First run to generate profiling information.
+//! export RUSTFLAGS="-Cprofile-generate -Zno-profiler-runtime"
+//! cargo run --target x86_64-unknown-linux-gnu --release
+//!
+//! # Post-process the profiling information.
+//! # The rust-profdata tool comes from cargo-binutils.
+//! rust-profdata merge -o output.profdata output.profraw
+//!
+//! # Optimized build using PGO. minicov is not needed in this step.
+//! export RUSTFLAGS="-Cprofile-use=output.profdata"
+//! cargo build --target x86_64-unknown-linux-gnu --release
+//! ```
 
 #![no_std]
 #![warn(missing_docs)]
@@ -78,19 +105,115 @@ extern crate alloc;
 
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
-use core::fmt;
+#[cfg(feature = "alloc")]
+use core::alloc::Layout;
+use core::{fmt, slice};
+
+#[allow(non_snake_case)]
+#[repr(C)]
+struct ProfDataIOVec {
+    Data: *mut u8,
+    ElmSize: usize,
+    NumElm: usize,
+    UseZeroPadding: i32,
+}
+
+#[allow(non_snake_case)]
+#[repr(C)]
+struct ProfDataWriter {
+    Write:
+        unsafe extern "C" fn(This: *mut ProfDataWriter, *mut ProfDataIOVec, NumIOVecs: u32) -> u32,
+    WriterCtx: *mut u8,
+}
+
+// Opaque type for our purposes.
+enum VPDataReaderType {}
 
 extern "C" {
     fn __llvm_profile_reset_counters();
     fn __llvm_profile_merge_from_buffer(profile: *const u8, size: u64) -> i32;
-    fn __llvm_profile_write_buffer(buffer: *mut u8) -> i32;
-    fn __llvm_profile_get_size_for_buffer() -> u64;
     fn __llvm_profile_check_compatibility(profile: *const u8, size: u64) -> i32;
     fn __llvm_profile_get_version() -> u64;
+    fn lprofWriteData(
+        Writer: *mut ProfDataWriter,
+        VPDataReader: *mut VPDataReaderType,
+        SkipNameDataWrite: i32,
+    ) -> i32;
+    fn lprofGetVPDataReader() -> *mut VPDataReaderType;
 }
 
 const INSTR_PROF_RAW_VERSION: u64 = 8;
 const VARIANT_MASKS_ALL: u64 = 0xff00000000000000;
+
+// Memory allocation functions used by value profiling. If the "alloc" feature
+// is disabled then value profiling will also be disabled.
+#[cfg(feature = "alloc")]
+#[no_mangle]
+unsafe fn minicov_alloc_zeroed(size: usize, align: usize) -> *mut u8 {
+    alloc::alloc::alloc_zeroed(Layout::from_size_align(size, align).unwrap())
+}
+#[cfg(feature = "alloc")]
+#[no_mangle]
+unsafe fn minicov_dealloc(ptr: *mut u8, size: usize, align: usize) {
+    alloc::alloc::dealloc(ptr, Layout::from_size_align(size, align).unwrap())
+}
+#[cfg(not(feature = "alloc"))]
+#[no_mangle]
+unsafe fn minicov_alloc_zeroed(_size: usize, _align: usize) -> *mut u8 {
+    core::ptr::null_mut()
+}
+#[cfg(not(feature = "alloc"))]
+#[no_mangle]
+unsafe fn minicov_dealloc(_ptr: *mut u8, _size: usize, _align: usize) {}
+
+/// Sink into which coverage data can be written.
+///
+/// A default implementation for `Vec<u8>` is provided,
+pub trait CoverageWriter {
+    /// Writes the given bytes to the sink.
+    ///
+    /// This method should return an error if all bytes could not be written to
+    /// the sink.
+    fn write(&mut self, data: &[u8]) -> Result<(), CoverageWriteError>;
+}
+
+#[cfg(feature = "alloc")]
+impl CoverageWriter for Vec<u8> {
+    fn write(&mut self, data: &[u8]) -> Result<(), CoverageWriteError> {
+        self.extend_from_slice(data);
+        Ok(())
+    }
+}
+
+/// Callback function passed to `lprofWriteData`.
+unsafe extern "C" fn write_callback<Writer: CoverageWriter>(
+    this: *mut ProfDataWriter,
+    iovecs: *mut ProfDataIOVec,
+    num_iovecs: u32,
+) -> u32 {
+    let writer = &mut *((*this).WriterCtx as *mut Writer);
+    for iov in slice::from_raw_parts(iovecs, num_iovecs as usize) {
+        let len = iov.ElmSize * iov.NumElm;
+        if iov.Data.is_null() {
+            // Pad with zero bytes.
+            let zero = [0; 16];
+            let mut remaining = len;
+            while remaining != 0 {
+                let data = &zero[..usize::min(zero.len(), remaining)];
+                if writer.write(data).is_err() {
+                    return 1;
+                }
+                remaining -= data.len();
+            }
+        } else {
+            let data = slice::from_raw_parts(iov.Data, len);
+            if writer.write(data).is_err() {
+                return 1;
+            }
+        }
+    }
+    0
+}
 
 /// Checks that the instrumented binary uses the same profiling data format as
 /// the LLVM profiling runtime.
@@ -102,55 +225,34 @@ fn check_version() {
     );
 }
 
-/// Captures the coverage data for the current program and returns it as a
-/// binary blob.
-///
-/// The blob should be saved to a file with the `.profraw` extension, which can
-/// then be processed using the `llvm-profdata` and `llvm-cov` tools.
-///
-/// You should call `reset_coverage` afterwards if you intend to continue
-/// running the program so that future coverage can be merged with the returned
-/// captured coverage.
-#[cfg(feature = "alloc")]
-pub fn capture_coverage() -> Vec<u8> {
-    check_version();
-
-    let len = unsafe { __llvm_profile_get_size_for_buffer() as usize };
-    let mut data = Vec::with_capacity(len);
-
-    unsafe {
-        let ret = __llvm_profile_write_buffer(data.as_mut_ptr());
-        assert_eq!(ret, 0);
-        data.set_len(len);
-    }
-
-    data
-}
-
-/// Returns the size required to store the serialized coverage data
-pub fn get_coverage_data_size() -> usize {
-    unsafe { __llvm_profile_get_size_for_buffer() as usize }
-}
-
 /// Captures the coverage data for the current program and writes it into the
-/// provided slice. The slice must be the correct size to hold the coverage data
-/// so call `get_coverage_data_size` beforehand to ensure enough data is
-/// allocated.
+/// given sink.
 ///
-/// The blob should be saved to a file with the `.profraw` extension, which can
+/// The data should be saved to a file with the `.profraw` extension, which can
 /// then be processed using the `llvm-profdata` and `llvm-cov` tools.
 ///
 /// You should call `reset_coverage` afterwards if you intend to continue
 /// running the program so that future coverage can be merged with the returned
 /// captured coverage.
-pub fn capture_coverage_to_buffer(data: &mut [u8]) {
+///
+/// # Safety
+///
+/// This function is not thread-safe and should not be concurrently called from
+/// multiple threads.
+pub unsafe fn capture_coverage<Writer: CoverageWriter>(
+    writer: &mut Writer,
+) -> Result<(), CoverageWriteError> {
     check_version();
 
-    let len = unsafe { __llvm_profile_get_size_for_buffer() as usize };
-    assert_eq!(len, data.len());
-    unsafe {
-        let ret = __llvm_profile_write_buffer(data.as_mut_ptr());
-        assert_eq!(ret, 0);
+    let mut prof_writer = ProfDataWriter {
+        Write: write_callback::<Writer>,
+        WriterCtx: writer as *mut Writer as *mut u8,
+    };
+    let res = lprofWriteData(&mut prof_writer, lprofGetVPDataReader(), 0);
+    if res == 0 {
+        Ok(())
+    } else {
+        Err(CoverageWriteError)
     }
 }
 
@@ -165,21 +267,35 @@ impl fmt::Display for IncompatibleCoverageData {
     }
 }
 
+/// Error while trying to write coverage data.
+///
+/// This only happens if the `CoverageWriter` implementation returns an error.
+#[derive(Copy, Clone, Debug)]
+pub struct CoverageWriteError;
+impl fmt::Display for CoverageWriteError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("error while writing coverage data")
+    }
+}
+
 /// Merges previously dumped coverage data into the coverage counters.
 ///
 /// This should be called prior to dumping if coverage data from a previous run
 /// already exists and should be merged with instead of overwritten.
-pub fn merge_coverage(data: &[u8]) -> Result<(), IncompatibleCoverageData> {
+///
+/// # Safety
+///
+/// This function is not thread-safe and should not be concurrently called from
+/// multiple threads.
+pub unsafe fn merge_coverage(data: &[u8]) -> Result<(), IncompatibleCoverageData> {
     check_version();
 
-    unsafe {
-        if __llvm_profile_check_compatibility(data.as_ptr(), data.len() as u64) == 0
-            && __llvm_profile_merge_from_buffer(data.as_ptr(), data.len() as u64) == 0
-        {
-            Ok(())
-        } else {
-            Err(IncompatibleCoverageData)
-        }
+    if __llvm_profile_check_compatibility(data.as_ptr(), data.len() as u64) == 0
+        && __llvm_profile_merge_from_buffer(data.as_ptr(), data.len() as u64) == 0
+    {
+        Ok(())
+    } else {
+        Err(IncompatibleCoverageData)
     }
 }
 

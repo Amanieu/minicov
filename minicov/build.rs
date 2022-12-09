@@ -17,6 +17,7 @@ fn main() {
         "c/InstrProfilingMerge.c",
         "c/InstrProfilingPlatformLinux.c",
         "c/InstrProfilingWriter.c",
+        "c/InstrProfilingValue.c",
         "c/InstrProfilingVersionVar.c",
     ];
 

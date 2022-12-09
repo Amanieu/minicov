@@ -141,9 +141,14 @@ static inline size_t getpagesize() {
 #endif
 
 #include <stdint.h>
+#include <stdalign.h>
 
 #define memset __builtin_memset
 #define memcpy __builtin_memcpy
 #define memmove __builtin_memmove
+#define assert(...)
+
+void* minicov_alloc_zeroed(size_t size, size_t align);
+void* minicov_dealloc(void* ptr, size_t size, size_t align);
 
 #endif /* PROFILE_INSTRPROFILING_PORT_H_ */
