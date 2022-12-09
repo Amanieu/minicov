@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## v0.3.0 - 2022-12-09
+
+- Added support for profile-guided optimization. (#11)
+
 ## v0.2.4 - 2022-05-02
 
 - Fixed build for bare-metal targets again. (#7)
@@ -40,7 +44,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.3.0...HEAD
+[v0.3.0]: https://github.com/Amanieu/minicov/compare/v0.2.4...v0.3.0
 [v0.2.4]: https://github.com/Amanieu/minicov/compare/v0.2.3...v0.2.4
 [v0.2.3]: https://github.com/Amanieu/minicov/compare/v0.2.2...v0.2.3
 [v0.2.2]: https://github.com/Amanieu/minicov/compare/v0.2.1...v0.2.2

@@ -43,7 +43,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! minicov = "0.2"
+//! minicov = "0.3"
 //! ```
 //!
 //! 3. Before your program exits, call `minicov::capture_coverage` with a sink (such
