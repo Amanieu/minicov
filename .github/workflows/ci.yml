@@ -7,67 +7,57 @@ jobs:
     name: Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: cargo check
 
-  test:
-    name: Test
+  test-cov:
+    name: Test coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          profile: minimal
-          toolchain: nightly
-          override: true
-      - run: rustup component add llvm-tools-preview
-      - uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: grcov
-      - uses: actions-rs/cargo@v1
+          components: llvm-tools-preview
+      - run: cargo install grcov
+      - run: cargo run --target x86_64-unknown-linux-gnu -p minicov-test
         env:
           RUSTFLAGS: -Cinstrument-coverage -Zno-profiler-runtime
-        with:
-          command: run
-          args: --target x86_64-unknown-linux-gnu -p minicov-test
       - run: grcov -t html output.profraw -b target/x86_64-unknown-linux-gnu/debug/minicov-test -s .
+
+  test-pgo:
+    name: Test PGO
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: llvm-tools-preview
+      - run: cargo install cargo-binutils
+      - run: cargo run --target x86_64-unknown-linux-gnu -p minicov-test
+        env:
+          RUSTFLAGS: -Cprofile-generate -Zno-profiler-runtime
+      - run: rust-profdata merge -o output.profdata output.profraw
+      - run: cargo run --target x86_64-unknown-linux-gnu -p minicov-test
+        env:
+          RUSTFLAGS: -Cprofile-use=output.profdata
 
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: rustup component add rustfmt
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: -- --check
+          components: rustfmt
+      - run: cargo fmt -- --check
 
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          profile: minimal
-          toolchain: nightly
-          override: true
-      - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+          components: clippy
+      - run: cargo clippy -- -D warnings
