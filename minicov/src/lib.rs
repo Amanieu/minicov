@@ -145,6 +145,13 @@ extern "C" {
 const INSTR_PROF_RAW_VERSION: u64 = 8;
 const VARIANT_MASKS_ALL: u64 = 0xff00000000000000;
 
+// On some target rustc will insert an artificial dependency on the
+// __llvm_profile_runtime symbol to ensure the static initializer from LLVM's
+// profiling runtime is pulled in by the linker. We don't need any runtime
+// initialization so we just provide the symbol here.
+#[no_mangle]
+static __llvm_profile_runtime: u8 = 0;
+
 // Memory allocation functions used by value profiling. If the "alloc" feature
 // is disabled then value profiling will also be disabled.
 #[cfg(feature = "alloc")]
