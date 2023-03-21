@@ -161,8 +161,9 @@ unsafe fn minicov_alloc_zeroed(size: usize, align: usize) -> *mut u8 {
 }
 #[cfg(feature = "alloc")]
 #[no_mangle]
-unsafe fn minicov_dealloc(ptr: *mut u8, size: usize, align: usize) {
-    alloc::alloc::dealloc(ptr, Layout::from_size_align(size, align).unwrap())
+unsafe fn minicov_dealloc(ptr: *mut u8, size: usize, align: usize) -> usize {
+    alloc::alloc::dealloc(ptr, Layout::from_size_align(size, align).unwrap());
+    0
 }
 #[cfg(not(feature = "alloc"))]
 #[no_mangle]
@@ -171,7 +172,7 @@ unsafe fn minicov_alloc_zeroed(_size: usize, _align: usize) -> *mut u8 {
 }
 #[cfg(not(feature = "alloc"))]
 #[no_mangle]
-unsafe fn minicov_dealloc(_ptr: *mut u8, _size: usize, _align: usize) {}
+unsafe fn minicov_dealloc(_ptr: *mut u8, _size: usize, _align: usize) -> usize {}
 
 /// Sink into which coverage data can be written.
 ///
