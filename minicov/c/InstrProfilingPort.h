@@ -149,6 +149,6 @@ static inline size_t getpagesize() {
 #define assert(...)
 
 void* minicov_alloc_zeroed(size_t size, size_t align);
-void* minicov_dealloc(void* ptr, size_t size, size_t align);
+void minicov_dealloc(void* ptr, size_t size, size_t align);
 
 #endif /* PROFILE_INSTRPROFILING_PORT_H_ */
