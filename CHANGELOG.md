@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## v0.3.2 - 2023-03-30
+
+- Fixed incorrect signature for `minicov_dealloc`. (#15)
+
 ## v0.3.1 - 2022-12-21
 
 - Fixed link error on some targets by adding a dummy symbol. (#12)
@@ -48,7 +52,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.3.2...HEAD
+[v0.3.2]: https://github.com/Amanieu/minicov/compare/v0.3.1...v0.3.2
 [v0.3.1]: https://github.com/Amanieu/minicov/compare/v0.3.0...v0.3.1
 [v0.3.0]: https://github.com/Amanieu/minicov/compare/v0.2.4...v0.3.0
 [v0.2.4]: https://github.com/Amanieu/minicov/compare/v0.2.3...v0.2.4
