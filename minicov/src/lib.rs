@@ -166,12 +166,12 @@ unsafe extern "C" fn minicov_dealloc(ptr: *mut u8, size: usize, align: usize) {
 }
 #[cfg(not(feature = "alloc"))]
 #[no_mangle]
-unsafe extern "C" fn minicov_alloc_zeroed(_size: usize, _align: usize) -> *mut u8 {
+unsafe fn minicov_alloc_zeroed(_size: usize, _align: usize) -> *mut u8 {
     core::ptr::null_mut()
 }
 #[cfg(not(feature = "alloc"))]
 #[no_mangle]
-unsafe fn minicov_dealloc(_ptr: *mut u8, _size: usize, _align: usize) {}
+unsafe extern "C" fn minicov_dealloc(_ptr: *mut u8, _size: usize, _align: usize) {}
 
 /// Sink into which coverage data can be written.
 ///
