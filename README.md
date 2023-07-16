@@ -85,7 +85,7 @@ grcov output.profraw -b ./target/debug/my_program -s . -t html -o cov_report
 
 ## Profile-guided optimization
 
-The steps for profile-guided optimzation are similar. The only difference is the
+The steps for profile-guided optimization are similar. The only difference is the
 flags passed in `RUSTFLAGS`:
 
 ```sh
