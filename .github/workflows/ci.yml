@@ -42,6 +42,18 @@ jobs:
         env:
           RUSTFLAGS: -Cprofile-use=output.profdata
 
+  test-uefi:
+    name: Test UEFI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: x86_64-unknown-uefi
+      # Only build minicov, since UEFI targets are no_std and
+      # minicov-test uses std.
+      - run: cargo build --target x86_64-unknown-uefi -p minicov
+
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
