@@ -1,4 +1,5 @@
 use cc::Build;
+use std::env;
 use walkdir::WalkDir;
 
 fn main() {
@@ -10,16 +11,23 @@ fn main() {
     cfg.flag("-fno-coverage-mapping");
     cfg.define("COMPILER_RT_HAS_ATOMICS", "1");
 
-    let sources = [
+    let mut sources = vec![
         "c/InstrProfiling.c",
         "c/InstrProfilingBuffer.c",
         "c/InstrProfilingInternal.c",
         "c/InstrProfilingMerge.c",
-        "c/InstrProfilingPlatformLinux.c",
         "c/InstrProfilingWriter.c",
         "c/InstrProfilingValue.c",
         "c/InstrProfilingVersionVar.c",
     ];
+
+    let target = env::var("TARGET").unwrap_or_default();
+    if target.ends_with("-uefi") {
+        cfg.define("MINICOV_UEFI", "1");
+        sources.push("c/InstrProfilingPlatformWindows.c");
+    } else {
+        sources.push("c/InstrProfilingPlatformLinux.c");
+    }
 
     for source in &sources {
         cfg.file(source);
