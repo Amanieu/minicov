@@ -61,7 +61,7 @@
 #endif
 
 #if COMPILER_RT_HAS_ATOMICS == 1
-#ifdef _WIN32
+#if defined(_WIN32) && MINICOV_UEFI != 1
 #include <windows.h>
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #define snprintf _snprintf
@@ -82,10 +82,17 @@
                                     (LONG)sizeof(DomType) * PtrIncr)
 #endif
 #else /* !defined(_WIN32) */
+
+#if MINICOV_UEFI == 1 && defined(_WIN64)
+#define COMPILER_RT_PTR_FETCH_ADD_TYPE long long
+#else
+#define COMPILER_RT_PTR_FETCH_ADD_TYPE long
+#endif
+
 #define COMPILER_RT_BOOL_CMPXCHG(Ptr, OldV, NewV)                              \
   __sync_bool_compare_and_swap(Ptr, OldV, NewV)
 #define COMPILER_RT_PTR_FETCH_ADD(DomType, PtrVar, PtrIncr)                    \
-  (DomType *)__sync_fetch_and_add((long *)&PtrVar, sizeof(DomType) * PtrIncr)
+  (DomType *)__sync_fetch_and_add((COMPILER_RT_PTR_FETCH_ADD_TYPE *)&PtrVar, sizeof(DomType) * PtrIncr)
 #endif
 #else /* COMPILER_RT_HAS_ATOMICS != 1 */
 #define COMPILER_RT_BOOL_CMPXCHG(Ptr, OldV, NewV)                              \
@@ -108,7 +115,7 @@
   (((ch) == DIR_SEPARATOR) || ((ch) == DIR_SEPARATOR_2))
 #endif /* DIR_SEPARATOR_2 */
 
-#if defined(_WIN32)
+#if defined(_WIN32) && MINICOV_UEFI != 1
 #include <windows.h>
 static inline size_t getpagesize() {
   SYSTEM_INFO S;
