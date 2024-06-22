@@ -6,17 +6,12 @@
 |*
 \*===----------------------------------------------------------------------===*/
 
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__Fuchsia__) || \
+    (defined(__sun__) && defined(__svr4__)) || defined(__NetBSD__) || \
+    defined(_AIX)
+
 #include "InstrProfiling.h"
 #include "InstrProfilingInternal.h"
-
-#if defined(__FreeBSD__) && !defined(ElfW)
-/*
- * FreeBSD's elf.h and link.h headers do not define the ElfW(type) macro yet.
- * If this is added to all supported FreeBSD versions in the future, this
- * compatibility macro can be removed.
- */
-#define ElfW(type) __ElfN(type)
-#endif
 
 #define PROF_DATA_START INSTR_PROF_SECT_START(INSTR_PROF_DATA_COMMON)
 #define PROF_DATA_STOP INSTR_PROF_SECT_STOP(INSTR_PROF_DATA_COMMON)
@@ -24,6 +19,8 @@
 #define PROF_NAME_STOP INSTR_PROF_SECT_STOP(INSTR_PROF_NAME_COMMON)
 #define PROF_CNTS_START INSTR_PROF_SECT_START(INSTR_PROF_CNTS_COMMON)
 #define PROF_CNTS_STOP INSTR_PROF_SECT_STOP(INSTR_PROF_CNTS_COMMON)
+#define PROF_BITS_START INSTR_PROF_SECT_START(INSTR_PROF_BITS_COMMON)
+#define PROF_BITS_STOP INSTR_PROF_SECT_STOP(INSTR_PROF_BITS_COMMON)
 #define PROF_ORDERFILE_START INSTR_PROF_SECT_START(INSTR_PROF_ORDERFILE_COMMON)
 #define PROF_VNODES_START INSTR_PROF_SECT_START(INSTR_PROF_VNODES_COMMON)
 #define PROF_VNODES_STOP INSTR_PROF_SECT_STOP(INSTR_PROF_VNODES_COMMON)
@@ -37,6 +34,8 @@ extern __llvm_profile_data PROF_DATA_STOP COMPILER_RT_VISIBILITY
     COMPILER_RT_WEAK;
 extern char PROF_CNTS_START COMPILER_RT_VISIBILITY COMPILER_RT_WEAK;
 extern char PROF_CNTS_STOP COMPILER_RT_VISIBILITY COMPILER_RT_WEAK;
+extern char PROF_BITS_START COMPILER_RT_VISIBILITY COMPILER_RT_WEAK;
+extern char PROF_BITS_STOP COMPILER_RT_VISIBILITY COMPILER_RT_WEAK;
 extern uint32_t PROF_ORDERFILE_START COMPILER_RT_VISIBILITY COMPILER_RT_WEAK;
 extern char PROF_NAME_START COMPILER_RT_VISIBILITY COMPILER_RT_WEAK;
 extern char PROF_NAME_STOP COMPILER_RT_VISIBILITY COMPILER_RT_WEAK;
@@ -63,6 +62,12 @@ COMPILER_RT_VISIBILITY char *__llvm_profile_begin_counters(void) {
 COMPILER_RT_VISIBILITY char *__llvm_profile_end_counters(void) {
   return &PROF_CNTS_STOP;
 }
+COMPILER_RT_VISIBILITY char *__llvm_profile_begin_bitmap(void) {
+  return &PROF_BITS_START;
+}
+COMPILER_RT_VISIBILITY char *__llvm_profile_end_bitmap(void) {
+  return &PROF_BITS_STOP;
+}
 COMPILER_RT_VISIBILITY uint32_t *__llvm_profile_begin_orderfile(void) {
   return &PROF_ORDERFILE_START;
 }
@@ -80,26 +85,6 @@ COMPILER_RT_VISIBILITY ValueProfNode *EndVNode = &PROF_VNODES_STOP;
 #ifdef NT_GNU_BUILD_ID
 static size_t RoundUp(size_t size, size_t align) {
   return (size + align - 1) & ~(align - 1);
-}
-
-/*
- * Write binary id length and then its data, because binary id does not
- * have a fixed length.
- */
-static int WriteOneBinaryId(ProfDataWriter *Writer, uint64_t BinaryIdLen,
-                            const uint8_t *BinaryIdData,
-                            uint64_t BinaryIdPadding) {
-  ProfDataIOVec BinaryIdIOVec[] = {
-      {&BinaryIdLen, sizeof(uint64_t), 1, 0},
-      {BinaryIdData, sizeof(uint8_t), BinaryIdLen, 0},
-      {NULL, sizeof(uint8_t), BinaryIdPadding, 1},
-  };
-  if (Writer->Write(Writer, BinaryIdIOVec,
-                    sizeof(BinaryIdIOVec) / sizeof(*BinaryIdIOVec)))
-    return -1;
-
-  /* Successfully wrote binary id, report success. */
-  return 0;
 }
 
 /*
@@ -124,8 +109,9 @@ static int WriteBinaryIdForNote(ProfDataWriter *Writer,
     const uint8_t *BinaryIdData =
         (const uint8_t *)(NoteName + RoundUp(Note->n_namesz, 4));
     uint8_t BinaryIdPadding = __llvm_profile_get_num_padding_bytes(BinaryIdLen);
-    if (Writer != NULL && WriteOneBinaryId(Writer, BinaryIdLen, BinaryIdData,
-                                           BinaryIdPadding) == -1)
+    if (Writer != NULL &&
+        lprofWriteOneBinaryId(Writer, BinaryIdLen, BinaryIdData,
+                              BinaryIdPadding) == -1)
       return -1;
 
     BinaryIdSize = sizeof(BinaryIdLen) + BinaryIdLen + BinaryIdPadding;
@@ -209,7 +195,7 @@ COMPILER_RT_VISIBILITY int __llvm_write_binary_ids(ProfDataWriter *Writer) {
 
   return TotalBinaryIdsSize;
 }
-#else /* !NT_GNU_BUILD_ID */
+#elif !defined(_AIX) /* !NT_GNU_BUILD_ID */
 /*
  * Fallback implementation for targets that don't support the GNU
  * extensions NT_GNU_BUILD_ID and __ehdr_start.
@@ -220,16 +206,4 @@ COMPILER_RT_VISIBILITY int __llvm_write_binary_ids(ProfDataWriter *Writer) {
 }
 #endif
 
-// On some targets LLVM will emit calls to these functions. We don't actually
-// use them since we locate the profiling counters directly through linker
-// sections.
-COMPILER_RT_VISIBILITY
-void __llvm_profile_register_function(void *Data_) {
-  (void)Data_;
-}
-COMPILER_RT_VISIBILITY
-void __llvm_profile_register_names_function(void *NamesStart,
-                                            uint64_t NamesSize) {
-  (void)NamesStart;
-  (void)NamesSize;
-}
+#endif

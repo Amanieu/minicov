@@ -11,11 +11,14 @@ fn main() {
     cfg.flag("-fno-coverage-mapping");
     cfg.define("COMPILER_RT_HAS_ATOMICS", "1");
 
-    let mut sources = vec![
+    let sources = vec![
         "c/InstrProfiling.c",
         "c/InstrProfilingBuffer.c",
         "c/InstrProfilingInternal.c",
         "c/InstrProfilingMerge.c",
+        "c/InstrProfilingPlatformLinux.c",
+        "c/InstrProfilingPlatformOther.c",
+        "c/InstrProfilingPlatformWindows.c",
         "c/InstrProfilingWriter.c",
         "c/InstrProfilingValue.c",
         "c/InstrProfilingVersionVar.c",
@@ -24,9 +27,6 @@ fn main() {
     let target = env::var("TARGET").unwrap_or_default();
     if target.ends_with("-uefi") {
         cfg.define("MINICOV_UEFI", "1");
-        sources.push("c/InstrProfilingPlatformWindows.c");
-    } else {
-        sources.push("c/InstrProfilingPlatformLinux.c");
     }
 
     for source in &sources {

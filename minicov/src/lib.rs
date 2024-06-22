@@ -47,7 +47,7 @@
 //! ```
 //!
 //! 3. Before your program exits, call `minicov::capture_coverage` with a sink (such
-//! as `Vec<u8>`) and then dump its contents to a file with the `.profraw` extension:
+//!    as `Vec<u8>`) and then dump its contents to a file with the `.profraw` extension:
 //!
 //! ```ignore
 //! fn main() {
@@ -69,7 +69,7 @@
 //! is enabled then an implementation is provided for `Vec<u8>`.
 //!
 //! 4. Use a tool such as [grcov] or llvm-cov to generate a human-readable coverage
-//! report:
+//!    report:
 //!
 //! ```sh
 //! grcov output.profraw -b ./target/debug/my_program -s . -t html -o cov_report
@@ -142,8 +142,8 @@ extern "C" {
     fn lprofGetVPDataReader() -> *mut VPDataReaderType;
 }
 
-const INSTR_PROF_RAW_VERSION: u64 = 8;
-const VARIANT_MASKS_ALL: u64 = 0xff00000000000000;
+const INSTR_PROF_RAW_VERSION: u64 = 9;
+const VARIANT_MASKS_ALL: u64 = 0xffffffff00000000;
 
 // On some target rustc will insert an artificial dependency on the
 // __llvm_profile_runtime symbol to ensure the static initializer from LLVM's
