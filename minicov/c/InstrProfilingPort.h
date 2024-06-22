@@ -95,6 +95,7 @@
   (DomType *)__sync_fetch_and_add((COMPILER_RT_PTR_FETCH_ADD_TYPE *)&PtrVar, sizeof(DomType) * PtrIncr)
 #endif
 #else /* COMPILER_RT_HAS_ATOMICS != 1 */
+#include "InstrProfilingUtil.h"
 #define COMPILER_RT_BOOL_CMPXCHG(Ptr, OldV, NewV)                              \
   lprofBoolCmpXchg((void **)Ptr, OldV, NewV)
 #define COMPILER_RT_PTR_FETCH_ADD(DomType, PtrVar, PtrIncr)                    \
@@ -130,6 +131,13 @@ static inline size_t getpagesize() {
 }
 #endif /* defined(_WIN32) */
 
+#if 1
+#define PROF_ERR(Format, ...)
+
+#define PROF_WARN(Format, ...)
+
+#define PROF_NOTE(Format, ...)
+#else
 #define PROF_ERR(Format, ...)                                                  \
   fprintf(stderr, "LLVM Profile Error: " Format, __VA_ARGS__);
 
@@ -138,6 +146,7 @@ static inline size_t getpagesize() {
 
 #define PROF_NOTE(Format, ...)                                                 \
   fprintf(stderr, "LLVM Profile Note: " Format, __VA_ARGS__);
+#endif
 
 #ifndef MAP_FILE
 #define MAP_FILE 0
