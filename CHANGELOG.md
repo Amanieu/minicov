@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## v0.3.5 - 2024-06-25
+
+- Fixed build on non-Linux/Windows target. (#22)
+
 ## v0.3.4 - 2024-06-22
 
-- Upgraded bundle LLVM runtime to version 9. (#20)
+- Upgraded bundled LLVM runtime to coverage format version 9. (#20)
 
 ## v0.3.3 - 2023-11-28
 
@@ -60,7 +64,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.3.4...HEAD
+[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.3.5...HEAD
+[v0.3.5]: https://github.com/Amanieu/minicov/compare/v0.3.4...v0.3.5
 [v0.3.4]: https://github.com/Amanieu/minicov/compare/v0.3.3...v0.3.4
 [v0.3.3]: https://github.com/Amanieu/minicov/compare/v0.3.2...v0.3.3
 [v0.3.2]: https://github.com/Amanieu/minicov/compare/v0.3.1...v0.3.2
