@@ -142,7 +142,7 @@ extern "C" {
     fn lprofGetVPDataReader() -> *mut VPDataReaderType;
 }
 
-const INSTR_PROF_RAW_VERSION: u64 = 9;
+const INSTR_PROF_RAW_VERSION: u64 = 10;
 const VARIANT_MASKS_ALL: u64 = 0xffffffff00000000;
 
 // On some target rustc will insert an artificial dependency on the
