@@ -159,6 +159,7 @@ static inline size_t getpagesize() {
 #include <stdint.h>
 #include <stdalign.h>
 
+#define memcmp __builtin_memcmp
 #define memset __builtin_memset
 #define memcpy __builtin_memcpy
 #define memmove __builtin_memmove
