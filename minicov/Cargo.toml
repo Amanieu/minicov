@@ -1,6 +1,6 @@
 [package]
 name = "minicov"
-version = "0.3.6"
+version = "0.3.7"
 authors = ["Amanieu d'Antras <amanieu@gmail.com>"]
 description = "Code coverage and profile-guided optimization support for no_std and embedded programs"
 license = "Apache-2.0/MIT"

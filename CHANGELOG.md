@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## v0.3.7 - 2024-11-03
+
+- Fixed compilation error on UEFI. (#25)
+
 ## v0.3.6 - 2024-10-23
 
 - Upgraded bundled LLVM runtime to coverage format version 10. (#24)
@@ -68,7 +72,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.3.6...HEAD
+[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.3.7...HEAD
+[v0.3.7]: https://github.com/Amanieu/minicov/compare/v0.3.6...v0.3.7
 [v0.3.6]: https://github.com/Amanieu/minicov/compare/v0.3.5...v0.3.6
 [v0.3.5]: https://github.com/Amanieu/minicov/compare/v0.3.4...v0.3.5
 [v0.3.4]: https://github.com/Amanieu/minicov/compare/v0.3.3...v0.3.4
