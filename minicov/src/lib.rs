@@ -140,6 +140,7 @@ extern "C" {
         SkipNameDataWrite: i32,
     ) -> i32;
     fn lprofGetVPDataReader() -> *mut VPDataReaderType;
+    fn lprofGetLoadModuleSignature() -> u64;
 }
 
 const INSTR_PROF_RAW_VERSION: u64 = 10;
@@ -320,4 +321,15 @@ pub fn reset_coverage() {
     unsafe {
         __llvm_profile_reset_counters();
     }
+}
+
+/// Returns the profile header "signature" value associated with the current
+/// executable or shared library.
+///
+/// The signature value can be used to for a profile name that is unique to
+/// this load module so that it does not collide with profiles from other
+/// binaries. It also allows shared libraries to dump merged profile data into
+/// its own profile file.
+pub fn module_signature() -> u64 {
+    unsafe { lprofGetLoadModuleSignature() }
 }
