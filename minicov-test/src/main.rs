@@ -14,6 +14,8 @@ fn do_stuff(x: bool) {
 }
 
 fn main() {
+    println!("built with coverage: {}", minicov::coverage_enabled());
+
     do_stuff(false);
     let mut coverage = vec![];
     unsafe {

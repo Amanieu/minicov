@@ -133,6 +133,8 @@ struct ProfDataWriter {
 enum VPDataReaderType {}
 
 extern "C" {
+    fn __llvm_profile_begin_counters() -> *const u8;
+    fn __llvm_profile_end_counters() -> *const u8;
     fn __llvm_profile_reset_counters();
     fn __llvm_profile_merge_from_buffer(profile: *const u8, size: u64) -> i32;
     fn __llvm_profile_check_compatibility(profile: *const u8, size: u64) -> i32;
@@ -234,6 +236,15 @@ fn check_version() {
         version, INSTR_PROF_RAW_VERSION,
         "Runtime and instrumentation version mismatch"
     );
+}
+
+/// Returns whether the current binary was built with coverage instrumentation
+/// enabled.
+///
+/// If this returns `false` then the functions in this file will still function
+/// correctly but will emit empty coverage data.
+pub fn coverage_enabled() -> bool {
+    unsafe { __llvm_profile_begin_counters() != __llvm_profile_end_counters() }
 }
 
 /// Captures the coverage data for the current program and writes it into the
