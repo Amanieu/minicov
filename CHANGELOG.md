@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## Unreleased
+
+## v0.3.8 - 2025-12-05
+
+- Fixed broken profiling on WASM. (#32)
+- Fixed broken profiling on bare-metal targets.
+- Added function to detect whether the current binary was built with coverage
+  enabled.
+- Added function to return the current module signature. (#27)
 
 ## v0.3.7 - 2024-11-03
 
@@ -71,20 +79,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## v0.1.0 - 2020-04-20
 
 - Initial release
-
-[Unreleased]: https://github.com/Amanieu/minicov/compare/v0.3.7...HEAD
-[v0.3.7]: https://github.com/Amanieu/minicov/compare/v0.3.6...v0.3.7
-[v0.3.6]: https://github.com/Amanieu/minicov/compare/v0.3.5...v0.3.6
-[v0.3.5]: https://github.com/Amanieu/minicov/compare/v0.3.4...v0.3.5
-[v0.3.4]: https://github.com/Amanieu/minicov/compare/v0.3.3...v0.3.4
-[v0.3.3]: https://github.com/Amanieu/minicov/compare/v0.3.2...v0.3.3
-[v0.3.2]: https://github.com/Amanieu/minicov/compare/v0.3.1...v0.3.2
-[v0.3.1]: https://github.com/Amanieu/minicov/compare/v0.3.0...v0.3.1
-[v0.3.0]: https://github.com/Amanieu/minicov/compare/v0.2.4...v0.3.0
-[v0.2.4]: https://github.com/Amanieu/minicov/compare/v0.2.3...v0.2.4
-[v0.2.3]: https://github.com/Amanieu/minicov/compare/v0.2.2...v0.2.3
-[v0.2.2]: https://github.com/Amanieu/minicov/compare/v0.2.1...v0.2.2
-[v0.2.1]: https://github.com/Amanieu/minicov/compare/v0.2.0...v0.2.1
-[v0.2.0]: https://github.com/Amanieu/minicov/compare/v0.1.2...v0.2.0
-[v0.1.2]: https://github.com/Amanieu/minicov/compare/v0.1.1...v0.1.2
-[v0.1.1]: https://github.com/Amanieu/minicov/compare/v0.1.0...v0.1.1
