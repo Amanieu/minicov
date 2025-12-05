@@ -36,7 +36,7 @@ jobs:
       - run: cargo install cargo-binutils
       - run: cargo run --target x86_64-unknown-linux-gnu -p minicov-test
         env:
-          RUSTFLAGS: -Cprofile-generate -Zno-profiler-runtime
+          RUSTFLAGS: -Cprofile-generate=output.profraw -Zno-profiler-runtime
       - run: rust-profdata merge -o output.profdata output.profraw
       - run: cargo run --target x86_64-unknown-linux-gnu -p minicov-test
         env:

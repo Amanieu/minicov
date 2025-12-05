@@ -84,7 +84,10 @@
 //!
 //! ```sh
 //! # First run to generate profiling information.
-//! export RUSTFLAGS="-Cprofile-generate -Zno-profiler-runtime"
+//! #
+//! # The filename passed to profile-generate doesn't matter, but cc-rs complains
+//! # if it is not provided.
+//! export RUSTFLAGS="-Cprofile-generate=output.profraw -Zno-profiler-runtime"
 //! cargo run --target x86_64-unknown-linux-gnu --release
 //!
 //! # Post-process the profiling information.
