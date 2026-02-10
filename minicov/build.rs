@@ -11,8 +11,15 @@ fn main() {
     cfg.flag("-fno-profile-instr-generate");
     cfg.flag("-fno-profile-instr-use");
     cfg.flag("-fno-coverage-mapping");
+    cfg.warnings(false);
     cfg.define("COMPILER_RT_HAS_ATOMICS", "1");
     cfg.define("COMPILER_RT_PROFILE_BAREMETAL", "1");
+
+    if let Ok(include) = std::env::var("INCLUDE") {
+        for path in include.split(';') {
+            cfg.include(path);
+        }
+    }
 
     let sources = vec![
         "c/InstrProfiling.c",
